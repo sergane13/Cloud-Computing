@@ -1,7 +1,6 @@
 package org.main;
-
-import org.main.Db.PostgresConnection;
-import org.main.Handlers.GetHandlers.GetTasks;
+import org.main.Handlers.TaskHandler;
+import org.main.Handlers.UserHandler;
 import org.main.Server.Server;
 
 import java.io.IOException;
@@ -12,7 +11,9 @@ public class Main {
             Server server = Server.getInstance();
             server.startServer();
 
-            server.createContext("/task", new GetTasks());
+            server.createContext("/tasks", new TaskHandler());
+            server.createContext("/users", new UserHandler());
+
         } catch (IOException e) {
             e.printStackTrace();
         }

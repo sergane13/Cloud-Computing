@@ -35,7 +35,8 @@ public class PathsHandler {
                 response = responseData.getJsoObject();
                 statusCode = responseData.getStatusCode();
             } catch (Exception e) {
-                response = new JSONObject().put("error", "Bad request");
+                System.out.println(e.getMessage());
+                response = new JSONObject().put("error", "Internal Server Error");
                 statusCode = HTTP_CODES.INTERNAL_SERVER_ERROR;
             }
         } else {
@@ -70,9 +71,26 @@ public class PathsHandler {
         responseHeaders.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
         responseHeaders.add("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-        exchange.sendResponseHeaders(statusCode, response.getBytes().length);
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(response.getBytes());
+        if (statusCode == HTTP_CODES.NO_CONTENT) {
+            exchange.sendResponseHeaders(statusCode, -1);
+        } else {
+            exchange.sendResponseHeaders(statusCode, response.getBytes().length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response.getBytes());
+            }
+        }
+    }
+
+    public static void handleCors(HttpExchange exchange) throws IOException {
+        String origin = exchange.getRequestHeaders().getFirst("Origin");
+        if (origin != null) {
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+            if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+                exchange.sendResponseHeaders(HTTP_CODES.OK, -1);
+            }
         }
     }
 }

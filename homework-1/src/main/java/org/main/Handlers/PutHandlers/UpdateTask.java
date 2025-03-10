@@ -1,65 +1,71 @@
-package org.main.Handlers.PostHandlers;
+package org.main.Handlers.PutHandlers;
+
+import com.sun.net.httpserver.HttpHandler;
+import org.main.Handlers.ProcessRequest;
 
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import org.json.JSONObject;
 import org.main.Db.DbCommunication;
 import org.main.Db.Entity.Task;
 import org.main.Db.PostgresConnection;
 import org.main.Handlers.PathsHandler;
-import org.main.Handlers.ProcessRequest;
 import org.main.Static.HTTP_CODES;
 import org.main.Static.HTTP_VERBS;
 import org.main.Static.ResponseData;
 import java.time.LocalDateTime;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-// POST /tasks
-public class CreateTask implements HttpHandler, ProcessRequest {
+public class UpdateTask implements HttpHandler, ProcessRequest {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        PathsHandler.handleRequest(exchange, HTTP_VERBS.POST, this);
+        PathsHandler.handleRequest(exchange, HTTP_VERBS.PUT, this);
     }
 
     public ResponseData processRequest(JSONObject requestBodyJson) {
         JSONObject dataJson = new JSONObject();
 
+        int taskId = requestBodyJson.optInt("id", -1);
+        if (taskId == -1) {
+            dataJson.put("error", "Task ID is required");
+            return new ResponseData(dataJson, HTTP_CODES.BAD_REQUEST);
+        }
+
         String title = requestBodyJson.optString("title", "").trim();
         String description = requestBodyJson.optString("description", "").trim();
-        String status = requestBodyJson.optString("status", "pending").trim();
+        String status = requestBodyJson.optString("status", "").trim();
         String assignedTo = requestBodyJson.optString("assignedTo", "").trim();
         String dueDateStr = requestBodyJson.optString("dueDate", "").trim();
 
-        if (title.isEmpty() || description.isEmpty()) {
-            dataJson.put("error", "Title and description are required");
+        if (title.isEmpty() || description.isEmpty() || status.isEmpty()) {
+            dataJson.put("error", "Title, description, and status are required");
             return new ResponseData(dataJson, HTTP_CODES.BAD_REQUEST);
         }
 
         LocalDateTime dueDate = dueDateStr.isEmpty() ? null : LocalDateTime.parse(dueDateStr);
         LocalDateTime createdAt = LocalDateTime.now();
 
-        Task task  = new Task.
-                TaskBuilder()
+        Task task = new Task.TaskBuilder()
+                .setId(taskId)
                 .setTitle(title)
                 .setDescription(description)
                 .setAssignedTo(assignedTo)
                 .setStatus(status)
                 .setDueDate(dueDate)
                 .setCreatedAt(createdAt)
-                        .build();
+                .build();
 
-        List<Task> tasks = new ArrayList<>();
-        tasks.add(task);
-        boolean response = DbCommunication.addTask(PostgresConnection.getInstance().getConnection(), tasks);
+        if (!DbCommunication.doesTaskExist(PostgresConnection.getInstance().getConnection(), taskId)) {
+            dataJson.put("message", "Task does not exist");
+            return new ResponseData(dataJson, HTTP_CODES.BAD_REQUEST);
+        }
+
+        boolean response = DbCommunication.updateTask(PostgresConnection.getInstance().getConnection(), task);
 
         if (response) {
-            dataJson.put("message", "Task created successfully");
-            return new ResponseData(dataJson, HTTP_CODES.CREATED);
+            return new ResponseData(dataJson, HTTP_CODES.NO_CONTENT);
         } else {
-            dataJson.put("message", "Failed to add task");
+            dataJson.put("message", "Failed to update task");
             return new ResponseData(dataJson, HTTP_CODES.INTERNAL_SERVER_ERROR);
         }
     }

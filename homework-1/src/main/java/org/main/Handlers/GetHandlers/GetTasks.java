@@ -15,7 +15,6 @@ import org.main.Static.ResponseData;
 import java.io.IOException;
 import java.util.List;
 
-// GET /tasks
 public class GetTasks implements HttpHandler, ProcessRequest {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -25,8 +24,25 @@ public class GetTasks implements HttpHandler, ProcessRequest {
     public ResponseData processRequest(JSONObject requestBodyJson) {
         JSONObject dataJson = new JSONObject();
         JSONObject tasksJson = new JSONObject();
+        List<Task> tasks;
 
-        List<Task> tasks = DbCommunication.getAllTasks(PostgresConnection.getInstance().getConnection());
+        if (requestBodyJson.has("username")) {
+            String username = requestBodyJson.optString("username", "").trim();
+
+            if (username.isEmpty()) {
+                dataJson.put("error", "Username is required");
+                return new ResponseData(dataJson, HTTP_CODES.BAD_REQUEST);
+            }
+
+            if (!DbCommunication.doesUserExist(PostgresConnection.getInstance().getConnection(), username)) {
+                dataJson.put("error", "User does not exist");
+                return new ResponseData(dataJson, HTTP_CODES.NOT_FOUND);
+            }
+
+            tasks = DbCommunication.getAllTasks(PostgresConnection.getInstance().getConnection(), username);
+        } else {
+            tasks = DbCommunication.getAllTasks(PostgresConnection.getInstance().getConnection(), "");
+        }
 
         for (Task task : tasks) {
             JSONObject taskJson = new JSONObject();

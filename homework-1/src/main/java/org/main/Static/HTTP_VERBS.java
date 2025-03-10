@@ -7,6 +7,8 @@ public class HTTP_VERBS {
 
     public static final String PUT = "PUT";
 
+    public static final String PATCH = "PATCH";
+
     public static final String DELETE = "DELETE";
 
     public static final String HEAD = "HEAD";
@@ -24,6 +26,7 @@ public class HTTP_VERBS {
             case GET:
             case POST:
             case PUT:
+            case PATCH:
             case DELETE:
             case HEAD:
             case OPTIONS:
