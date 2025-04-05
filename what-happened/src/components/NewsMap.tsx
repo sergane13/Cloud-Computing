@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import countryToContinent from "../data/countries.json";
+import { useLocationContext } from "../context/LocationContext";
 
 const containerStyle: React.CSSProperties = {
     width: "100%",
@@ -22,20 +23,15 @@ interface MarkerData {
 const NewsMap: React.FC = () => {
     const [zoom, setZoom] = useState<number>(2);
     const [location, setLocation] = useState<google.maps.LatLngLiteral>(defaultCenter);
-    const [city, setCity] = useState<string>("");
-    const [region, setRegion] = useState<string>("");
-    const [country, setCountry] = useState<string>("Worldwide");
-    const [continent, setContinent] = useState<string>("");
     const [markers, setMarkers] = useState<MarkerData[]>([]);
     const mapRef = useRef<google.maps.Map | null>(null);
     const debounceTimerRef = useRef<number | null>(null);
 
+    const { city, region, country, continent, setLocation: setGlobalLocation } = useLocationContext();
+
     const fetchLocationDetails = async (lat: number, lng: number, zoomLevel: number) => {
         if (zoomLevel <= 3) {
-            setCity("");
-            setRegion("");
-            setCountry("Worldwide");
-            setContinent("");
+            setGlobalLocation({ city: "", region: "", country: "Worldwide", continent: "" });
             return;
         }
 
@@ -75,10 +71,12 @@ const NewsMap: React.FC = () => {
                     continentName = (countryToContinent as Record<string, string>)[countryName] || "";
                 }
 
-                setCity(cityName);
-                setRegion(regionName);
-                setCountry(countryName);
-                setContinent(continentName);
+                setGlobalLocation({
+                    city: cityName,
+                    region: regionName,
+                    country: countryName,
+                    continent: continentName
+                });
             }
         } catch (error) {
             console.error("Error fetching location info:", error);
