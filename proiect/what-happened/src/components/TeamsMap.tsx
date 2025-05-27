@@ -167,6 +167,20 @@ const TeamsMap: React.FC<TeamsMapProps> = ({ items, onClusterTeamsSelect}) => {
         };
     }, [items, onClusterTeamsSelect]);
 
+    useEffect(() => {
+        return () => {
+            if (mapRef.current) {
+                google.maps.event.clearInstanceListeners(mapRef.current);
+                mapRef.current = null;
+            }
+
+            markersRef.current.forEach(marker => {
+                marker.setMap(null);
+            });
+            markersRef.current = [];
+            markerToTeam.current.clear();
+        };
+    }, []);
 
     return (
         <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>

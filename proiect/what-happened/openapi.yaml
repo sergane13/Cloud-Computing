@@ -1,0 +1,121 @@
+swagger: "2.0"
+info:
+  title: News Maps API Gateway
+  description: API Gateway routing for Firebase Functions
+  version: 1.0.0
+
+host: newsmaps-gateway-9p2v495a.uc.gateway.dev
+x-google-endpoints:
+  - name: newsmaps-gateway-9p2v495a.uc.gateway.dev
+    allowCors: true
+
+schemes:
+  - https
+
+paths:
+  /getTeamsByCity:
+    options:
+      summary: CORS support
+      operationId: optionsGetTeamByCity
+      responses:
+        "200":
+          description: CORS preflight
+      x-google-backend:
+        address: https://us-central1-news-maps-455910.cloudfunctions.net/getTeamsByCity
+
+    get:
+      operationId: getTeamsByCity
+      security:
+        - firebase: []
+      responses:
+        "200":
+          description: A successful response
+      x-google-backend:
+        address: https://us-central1-news-maps-455910.cloudfunctions.net/getTeamsByCity
+
+  /searchNews:
+    options:
+      summary: CORS support
+      operationId: optionsSearchNews
+      responses:
+        "200":
+          description: CORS preflight
+      x-google-backend:
+        address: https://us-central1-news-maps-455910.cloudfunctions.net/searchNews
+
+    get:
+      operationId: searchNews
+      security:
+        - firebase: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          type: string
+      responses:
+        "200":
+          description: A successful response
+      x-google-backend:
+        address: https://us-central1-news-maps-455910.cloudfunctions.net/searchNews
+
+  /manageFavorites:
+    options:
+      summary: CORS support
+      operationId: optionsManageFavorites
+      responses:
+        "200":
+          description: CORS preflight
+      x-google-backend:
+        address: https://us-central1-news-maps-455910.cloudfunctions.net/manageFavorites
+
+    get:
+      operationId: getFavorites
+      security:
+        - firebase: []
+      parameters:
+        - name: uid
+          in: query
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Get favorites
+      x-google-backend:
+        address: https://us-central1-news-maps-455910.cloudfunctions.net/manageFavorites
+
+    post:
+      operationId: addFavorite
+      security:
+        - firebase: []
+      responses:
+        "200":
+          description: Add to favorites
+      x-google-backend:
+        address: https://us-central1-news-maps-455910.cloudfunctions.net/manageFavorites
+
+    delete:
+      operationId: removeFavorite
+      security:
+        - firebase: []
+      responses:
+        "200":
+          description: Remove from favorites
+      x-google-backend:
+        address: https://us-central1-news-maps-455910.cloudfunctions.net/manageFavorites
+
+securityDefinitions:
+  firebase:
+    authorizationUrl: ""
+    flow: "implicit"
+    type: "oauth2"
+    x-google-issuer: https://securetoken.google.com/news-maps-455910
+    x-google-jwks_uri: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
+    x-google-audiences: news-maps-455910
+
+x-google-cors:
+  allowOrigins:
+    - "http://localhost:5173"
+    - "https://news-maps-455910.uc.r.appspot.com"
+  allowMethods: ["GET", "POST", "DELETE", "OPTIONS"]
+  allowHeaders: ["Authorization", "Content-Type"]
+  maxAge: "3600"

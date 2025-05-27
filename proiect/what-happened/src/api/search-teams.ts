@@ -1,6 +1,10 @@
-export const searchTeams = async (city: string, country: string) => {
+import { User } from "firebase/auth";
+
+export const searchTeams = async (user: User | null ,city: string, country: string) => {
+    const token = await user?.getIdToken();
+
     try {
-        let url = "https://us-central1-news-maps-455910.cloudfunctions.net/getTeamsByCity";
+        let url = "https://newsmaps-gateway-9p2v495a.uc.gateway.dev/getTeamsByCity";
 
         if (country !== "Worldwide") {
             const params = new URLSearchParams();
@@ -11,7 +15,11 @@ export const searchTeams = async (city: string, country: string) => {
             url += `?${params.toString()}`;
         }
 
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
 
         if (!response.ok) {
         throw new Error("Failed to fetch teams");

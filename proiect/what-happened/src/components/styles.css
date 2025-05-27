@@ -3,6 +3,10 @@
     border-color: #388e3c; /* slightly darker green */
 }
 
+.user:hover {
+    background-color: #388e3c;
+}
+
 @keyframes pulse {
     0% {
         opacity: 1;

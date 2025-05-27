@@ -1,7 +1,15 @@
-export const searchNews = async (query: string) => {
+import { User } from "firebase/auth";
+
+export const searchNews = async (user: User | null, query: string) => {
+    const token = await user?.getIdToken();
+
     try {
         const response = await fetch(
-            `https://us-central1-news-maps-455910.cloudfunctions.net/searchNews?q=${encodeURIComponent(query)}`
+            `https://newsmaps-gateway-9p2v495a.uc.gateway.dev/searchNews?q=${encodeURIComponent(query)}`,{
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
         );
 
         if (!response.ok) {
