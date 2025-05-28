@@ -60,7 +60,7 @@ Aceste soluții inspiră **BettMap** să combine date descentralizate cu o inter
 
 ## 6. Use-Case Diagram
 
-![Photo 1](./BettMap_Use-case_Diagram.png)
+![Photo 1](./usecase.png)
 
 - Actor principal: utilizator
 - Funcționalități secundare: socializare, preferințe, monetizare
